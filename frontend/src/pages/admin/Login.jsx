@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -11,34 +12,22 @@ const Login = () => {
 
   useEffect(() => {
     // Redirect to admin dashboard if already logged in
-    if (sessionStorage.getItem("ashnora_admin_logged_in") === "true") {
+    const token = localStorage.getItem("ashnora_token");
+    if (sessionStorage.getItem("ashnora_admin_logged_in") === "true" && token) {
       navigate("/admin", { replace: true });
-    }
-    // Set default password in localStorage if not exists
-    if (!localStorage.getItem("ashnora_admin_password")) {
-      localStorage.setItem("ashnora_admin_password", "admin123");
     }
   }, [navigate]);
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    const storedPassword = localStorage.getItem("ashnora_admin_password") || "admin123";
-
-    if (username.trim() !== "admin" && username.trim() !== "admin@ashnora.com") {
-      setError("Incorrect username. Try 'admin'.");
-      return;
+    try {
+      await api.login(username.trim(), password);
+      navigate("/admin", { replace: true });
+    } catch (err) {
+      setError(err.message || "Incorrect username or password. Try 'admin' & 'admin123'.");
     }
-
-    if (password !== storedPassword) {
-      setError("Incorrect password. Try 'admin123'.");
-      return;
-    }
-
-    // Authenticate
-    sessionStorage.setItem("ashnora_admin_logged_in", "true");
-    navigate("/admin", { replace: true });
   };
 
   return (

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const ContactFormBusiness = () => {
   const [fullName, setFullName] = useState("");
@@ -9,7 +10,7 @@ const ContactFormBusiness = () => {
   const [address, setAddress] = useState("");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!fullName || !phone || !pincode || !address) {
       alert("Name, Phone, Pincode, and Address are required!");
@@ -17,38 +18,31 @@ const ContactFormBusiness = () => {
     }
 
     const newInquiry = {
-      id: "survey_" + Date.now(),
       name: fullName,
       mobile: phone,
       email: email || "N/A",
       address: `${address} (Pincode: ${pincode})`,
       status: "Scheduled",
-      date: new Date().toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }) + ", " + new Date().toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
     };
 
-    const existingSurveys = JSON.parse(localStorage.getItem("ashnora_surveys") || "[]");
-    existingSurveys.unshift(newInquiry);
-    localStorage.setItem("ashnora_surveys", JSON.stringify(existingSurveys));
+    try {
+      await api.createInquiry(newInquiry);
 
-    // Reset Form
-    setFullName("");
-    setPhone("");
-    setEmail("");
-    setPincode("");
-    setAddress("");
+      // Reset Form
+      setFullName("");
+      setPhone("");
+      setEmail("");
+      setPincode("");
+      setAddress("");
 
-    // Show Success Toast
-    setShowSuccessToast(true);
-    setTimeout(() => {
-      setShowSuccessToast(false);
-    }, 4000);
+      // Show Success Toast
+      setShowSuccessToast(true);
+      setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 4000);
+    } catch (error) {
+      alert("Failed to submit inquiry: " + error.message);
+    }
   };
 
   return (

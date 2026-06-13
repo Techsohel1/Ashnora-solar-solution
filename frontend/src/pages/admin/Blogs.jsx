@@ -9,6 +9,7 @@ import {
   FaEdit, 
   FaFileAlt 
 } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -25,9 +26,13 @@ const Blogs = () => {
   const [blogDate, setBlogDate] = useState("");
 
   // Load blogs
-  const loadBlogs = () => {
-    const stored = JSON.parse(localStorage.getItem("ashnora_blogs") || "[]");
-    setBlogs(stored);
+  const loadBlogs = async () => {
+    try {
+      const data = await api.getBlogs();
+      setBlogs(data);
+    } catch (err) {
+      console.error("Failed to load blogs: " + err.message);
+    }
   };
 
   useEffect(() => {
@@ -44,7 +49,7 @@ const Blogs = () => {
   };
 
   // Submit Add/Edit Form
-  const handleBlogFormSubmit = (e) => {
+  const handleBlogFormSubmit = async (e) => {
     e.preventDefault();
     if (!title || !description) {
       alert("Title and description are required!");
@@ -58,44 +63,38 @@ const Blogs = () => {
       year: "numeric"
     }) : getTodayDateFormatted();
 
-    let updatedBlogs = [];
+    try {
+      if (editingBlog) {
+        // Edit mode
+        const updated = await api.updateBlog(editingBlog._id, {
+          title,
+          image: finalImage,
+          description,
+          date: finalDate
+        });
+        const updatedBlogs = blogs.map((item) => (item._id === editingBlog._id ? updated : item));
+        setBlogs(updatedBlogs);
+      } else {
+        // Add mode
+        const created = await api.createBlog({
+          title,
+          image: finalImage,
+          description,
+          date: finalDate
+        });
+        setBlogs([created, ...blogs]);
+      }
 
-    if (editingBlog) {
-      // Edit mode
-      updatedBlogs = blogs.map((item) => {
-        if (item.id === editingBlog.id) {
-          return {
-            ...item,
-            title,
-            image: finalImage,
-            description,
-            date: finalDate
-          };
-        }
-        return item;
-      });
-    } else {
-      // Add mode
-      const newBlog = {
-        id: "blog_" + Date.now(),
-        title,
-        image: finalImage,
-        description,
-        date: finalDate
-      };
-      updatedBlogs = [newBlog, ...blogs];
+      // Reset Form
+      setTitle("");
+      setImageUrl("");
+      setDescription("");
+      setBlogDate("");
+      setEditingBlog(null);
+      setShowAddModal(false);
+    } catch (err) {
+      alert("Failed to save blog post: " + err.message);
     }
-
-    localStorage.setItem("ashnora_blogs", JSON.stringify(updatedBlogs));
-    setBlogs(updatedBlogs);
-
-    // Reset Form
-    setTitle("");
-    setImageUrl("");
-    setDescription("");
-    setBlogDate("");
-    setEditingBlog(null);
-    setShowAddModal(false);
   };
 
   // Open Edit Modal
@@ -104,17 +103,20 @@ const Blogs = () => {
     setTitle(blog.title);
     setImageUrl(blog.image);
     setDescription(blog.description);
-    // Try converting the date string back to date format for input if possible, or just reset it
     setBlogDate("");
     setShowAddModal(true);
   };
 
   // Delete Blog
-  const handleDeleteBlog = (id) => {
+  const handleDeleteBlog = async (id) => {
     if (window.confirm("Are you sure you want to delete this blog post?")) {
-      const filtered = blogs.filter((item) => item.id !== id);
-      localStorage.setItem("ashnora_blogs", JSON.stringify(filtered));
-      setBlogs(filtered);
+      try {
+        await api.deleteBlog(id);
+        const filtered = blogs.filter((item) => item._id !== id);
+        setBlogs(filtered);
+      } catch (err) {
+        alert("Failed to delete blog post: " + err.message);
+      }
     }
   };
 
@@ -176,14 +178,14 @@ const Blogs = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredBlogs.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/40 transition">
+                  <tr key={item._id} className="hover:bg-gray-50/40 transition">
                     {/* Thumbnail & Title */}
                     <td className="px-6 py-4 max-w-sm">
                       <div className="flex items-center gap-4">
                         <img 
                           src={item.image} 
                           alt={item.title} 
-                          className="w-16 h-12 rounded-lg object-cover border border-gray-200 shrink-0"
+                          className="w-16 h-12 rounded-lg object-cover border border-gray-250 shrink-0"
                           onError={(e) => {
                             e.target.src = "https://images.unsplash.com/photo-1509391366360-2e959784a276";
                           }}
@@ -218,7 +220,7 @@ const Blogs = () => {
                         
                         {/* Delete Button */}
                         <button
-                          onClick={() => handleDeleteBlog(item.id)}
+                          onClick={() => handleDeleteBlog(item._id)}
                           title="Delete Blog"
                           className="p-2 bg-gray-50 hover:bg-red-500 text-gray-500 hover:text-white rounded-lg border border-gray-200 hover:border-red-500 transition duration-300 cursor-pointer"
                         >

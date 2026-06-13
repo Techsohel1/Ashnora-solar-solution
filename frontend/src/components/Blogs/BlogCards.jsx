@@ -1,72 +1,77 @@
 import { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const BlogCards = () => {
   const [blogsList, setBlogsList] = useState([]);
   const [selectedBlog, setSelectedBlog] = useState(null);
 
   useEffect(() => {
-    const loadBlogs = () => {
-      const storedBlogs = JSON.parse(localStorage.getItem("ashnora_blogs") || "[]");
-      if (storedBlogs.length > 0) {
-        setBlogsList(storedBlogs);
-      } else {
-        const defaultBlogs = [
-          {
-            id: "blog_1",
-            title: "The Truth About Free Solar Government Marketing",
-            image: "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1",
-            description: "Learn how solar energy can help reduce electricity costs while creating a sustainable future.",
-            date: "11 June 2026",
-          },
-          {
-            id: "blog_2",
-            title: "Is Solar Worth It for Small Businesses?",
-            image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7",
-            description: "Explore the financial advantages and environmental impacts of solar transition for small enterprises.",
-            date: "10 June 2026",
-          },
-          {
-            id: "blog_3",
-            title: "How Solar Panels Increase Property Value",
-            image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d",
-            description: "Solar installations not only save on bills but directly boost residential and commercial valuation.",
-            date: "09 June 2026",
-          },
-          {
-            id: "blog_4",
-            title: "5 Mistakes Before Installing Solar Panels",
-            image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e",
-            description: "Avoid these common planning pitfalls to ensure your investment returns maximum power generation.",
-            date: "08 June 2026",
-          },
-          {
-            id: "blog_5",
-            title: "Rooftop Solar vs Traditional Electricity",
-            image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
-            description: "A head-to-head comparison of efficiency, costs, reliability, and modern smart grid options.",
-            date: "07 June 2026",
-          },
-          {
-            id: "blog_6",
-            title: "Why Solar Energy is the Future of Rajasthan",
-            image: "https://images.unsplash.com/photo-1497440001374-f26997328c1b",
-            description: "Analyzing the policy incentives, geographical positioning, and sunlight distribution of the state.",
-            date: "06 June 2026",
-          },
-        ];
-        setBlogsList(defaultBlogs);
-        localStorage.setItem("ashnora_blogs", JSON.stringify(defaultBlogs));
+    const loadBlogs = async () => {
+      try {
+        const data = await api.getBlogs();
+        setBlogsList(data);
+      } catch (err) {
+        console.error("Failed to load blogs: " + err.message);
+        // Fallback to localStorage/default static blogs
+        const storedBlogs = JSON.parse(localStorage.getItem("ashnora_blogs") || "[]");
+        if (storedBlogs.length > 0) {
+          setBlogsList(storedBlogs);
+        } else {
+          const defaultBlogs = [
+            {
+              id: "blog_1",
+              title: "The Truth About Free Solar Government Marketing",
+              image: "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1",
+              description: "Learn how solar energy can help reduce electricity costs while creating a sustainable future.",
+              date: "11 June 2026",
+            },
+            {
+              id: "blog_2",
+              title: "Is Solar Worth It for Small Businesses?",
+              image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7",
+              description: "Explore the financial advantages and environmental impacts of solar transition for small enterprises.",
+              date: "10 June 2026",
+            },
+            {
+              id: "blog_3",
+              title: "How Solar Panels Increase Property Value",
+              image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d",
+              description: "Solar installations not only save on bills but directly boost residential and commercial valuation.",
+              date: "09 June 2026",
+            },
+            {
+              id: "blog_4",
+              title: "5 Mistakes Before Installing Solar Panels",
+              image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e",
+              description: "Avoid these common planning pitfalls to ensure your investment returns maximum power generation.",
+              date: "08 June 2026",
+            },
+            {
+              id: "blog_5",
+              title: "Rooftop Solar vs Traditional Electricity",
+              image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
+              description: "A head-to-head comparison of efficiency, costs, reliability, and modern smart grid options.",
+              date: "07 June 2026",
+            },
+            {
+              id: "blog_6",
+              title: "Why Solar Energy is the Future of Rajasthan",
+              image: "https://images.unsplash.com/photo-1497440001374-f26997328c1b",
+              description: "Analyzing the policy incentives, geographical positioning, and sunlight distribution of the state.",
+              date: "06 June 2026",
+            },
+          ];
+          setBlogsList(defaultBlogs);
+        }
       }
     };
 
     loadBlogs();
-    window.addEventListener("storage", loadBlogs);
-    return () => window.removeEventListener("storage", loadBlogs);
   }, []);
 
   const getBlogBodyContent = (blog) => {
-    if (blog.id === "blog_1") {
+    if (blog.id === "blog_1" || blog.title === "The Truth About Free Solar Government Marketing") {
       return `The solar industry has seen a massive surge in advertisements offering "Free Solar" under various government programs. While government incentives like subsidies (PM-Surya Ghar Yojana) exist and significantly reduce installation costs, the concept of getting a complete solar power plant installed for absolutely zero cost is often a misleading marketing angle used by lead generation agencies.
 
 Here is the truth behind these claims:
@@ -76,7 +81,7 @@ Here is the truth behind these claims:
 
 Always verify installer credentials and read the fine print before proceeding with any "free solar" offer.`;
     }
-    if (blog.id === "blog_2") {
+    if (blog.id === "blog_2" || blog.title === "Is Solar Worth It for Small Businesses?") {
       return `For small and medium enterprises (SMEs), electricity is often one of the largest fixed operational costs. Investing in solar panels might seem like a major upfront capital expense, but the long-term ROI is undeniably strong.
 
 Key financial and operational advantages:
@@ -85,12 +90,12 @@ Key financial and operational advantages:
 3. Green Brand Value: Customers today prefer dealing with sustainable, eco-friendly businesses.
 4. Fast Payback Period: Most commercial installations pay for themselves in 3 to 4 years, providing free electricity for the remaining 20+ years.`;
     }
-    if (blog.id === "blog_3") {
+    if (blog.id === "blog_3" || blog.title === "How Solar Panels Increase Property Value") {
       return `Adding a solar system to your home is not just about monthly energy savings; it is also a powerful long-term investment in your property's equity. Modern homebuyers are looking for energy-efficient homes that promise lower utility bills from day one.
 
 Studies indicate that homes with solar panels sell faster and at a premium of about 3-4% compared to homes without. Homebuyers see ready-to-use rooftop solar systems as a huge upgrade, much like an updated kitchen or newly renovated deck, without the hassle of coordinating installation themselves.`;
     }
-    if (blog.id === "blog_4") {
+    if (blog.id === "blog_4" || blog.title === "5 Mistakes Before Installing Solar Panels") {
       return `Installing solar is an excellent decision, but a few planning mistakes can lead to lower energy output or higher maintenance costs. Here are 5 mistakes to avoid:
 1. Ignoring shading issues: Trees or chimneys blocking sunlight for even a few hours can drop panel efficiency significantly.
 2. Choosing low-quality installers: Quality matters. A poor mounting structure can lead to roof leaks or wind damage.
@@ -98,7 +103,13 @@ Studies indicate that homes with solar panels sell faster and at a premium of ab
 4. Neglecting after-sales service policies.
 5. Not checking government compliance and approvals.`;
     }
-    return blog.description + `\n\nTransitioning to solar power is a long-term commitment that brings both environmental and financial rewards. Clean energy systems are designed to operate for 25 years or more, providing stable electricity generation. By choosing high-quality solar modules and working with experienced developers, you can ensure that your system achieves optimal performance and maximum savings throughout its lifespan.\n\nAt Ashnora Solar Solution, we are dedicated to providing the technical expertise, customized system design, and reliable service support required to make your transition smooth and highly profitable.`;
+    if (blog.id === "blog_5" || blog.title === "Rooftop Solar vs Traditional Electricity") {
+      return `A head-to-head comparison of efficiency, costs, reliability, and modern smart grid options. Rooftop solar provides independence and protection against rising utility rates.`;
+    }
+    if (blog.id === "blog_6" || blog.title === "Why Solar Energy is the Future of Rajasthan") {
+      return `Rajasthan is the solar hub of India, boasting maximum sunny days and favorable policy frameworks. Advancing with solar here maximizes investment return quickly.`;
+    }
+    return "";
   };
 
   return (
@@ -109,7 +120,7 @@ Studies indicate that homes with solar panels sell faster and at a premium of ab
 
           {blogsList.map((blog) => (
             <div
-              key={blog.id || blog.title}
+              key={blog._id || blog.id || blog.title}
               className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition duration-300 flex flex-col h-full cursor-pointer"
               onClick={() => setSelectedBlog(blog)}
             >
@@ -118,6 +129,9 @@ Studies indicate that homes with solar panels sell faster and at a premium of ab
                 src={blog.image}
                 alt={blog.title}
                 className="w-full h-64 object-cover"
+                onError={(e) => {
+                  e.target.src = "https://images.unsplash.com/photo-1509391366360-2e959784a276";
+                }}
               />
 
               <div className="p-6 flex flex-col flex-grow justify-between">
@@ -175,6 +189,9 @@ Studies indicate that homes with solar panels sell faster and at a premium of ab
                 src={selectedBlog.image} 
                 alt={selectedBlog.title} 
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = "https://images.unsplash.com/photo-1509391366360-2e959784a276";
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/45 to-transparent"></div>
               <div className="absolute bottom-6 left-6 right-16 text-white">
@@ -188,9 +205,11 @@ Studies indicate that homes with solar panels sell faster and at a premium of ab
               <p className="font-semibold text-[#00539B]">
                 {selectedBlog.description}
               </p>
-              <div className="whitespace-pre-line border-t border-gray-100 pt-6">
-                {getBlogBodyContent(selectedBlog)}
-              </div>
+              {getBlogBodyContent(selectedBlog) && (
+                <div className="whitespace-pre-line border-t border-gray-100 pt-6">
+                  {getBlogBodyContent(selectedBlog)}
+                </div>
+              )}
             </div>
 
             {/* Footer */}

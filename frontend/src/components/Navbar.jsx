@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { api } from "../utils/api";
 import {
   FaPhoneAlt,
   FaEnvelope,
@@ -88,7 +89,7 @@ const Navbar = () => {
     }
   }, []);
 
-  const handleSurveySubmit = (e) => {
+  const handleSurveySubmit = async (e) => {
     e.preventDefault();
     if (!surveyName || !surveyMobile) {
       alert("Name and Mobile Number are required!");
@@ -96,38 +97,31 @@ const Navbar = () => {
     }
 
     const newSurvey = {
-      id: 'survey_' + Date.now(),
       name: surveyName,
       mobile: surveyMobile,
       email: surveyEmail || "N/A",
       address: surveyAddress || "N/A",
       status: 'Scheduled',
-      date: new Date().toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      }) + ', ' + new Date().toLocaleTimeString('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
     };
 
-    const existingSurveys = JSON.parse(localStorage.getItem('ashnora_surveys') || '[]');
-    existingSurveys.unshift(newSurvey);
-    localStorage.setItem('ashnora_surveys', JSON.stringify(existingSurveys));
+    try {
+      await api.createInquiry(newSurvey);
 
-    // Reset fields
-    setSurveyName("");
-    setSurveyMobile("");
-    setSurveyEmail("");
-    setSurveyAddress("");
-    
-    // Close form and show success toast
-    setShowSurveyForm(false);
-    setShowSuccessToast(true);
-    setTimeout(() => {
-      setShowSuccessToast(false);
-    }, 4000);
+      // Reset fields
+      setSurveyName("");
+      setSurveyMobile("");
+      setSurveyEmail("");
+      setSurveyAddress("");
+      
+      // Close form and show success toast
+      setShowSurveyForm(false);
+      setShowSuccessToast(true);
+      setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 4000);
+    } catch (error) {
+      alert("Failed to submit survey request: " + error.message);
+    }
   };
 
  const navLinks = [

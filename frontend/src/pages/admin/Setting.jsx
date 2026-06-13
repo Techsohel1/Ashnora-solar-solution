@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FaLock, FaKey, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const Setting = () => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -8,28 +9,11 @@ const Setting = () => {
   
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  useEffect(() => {
-    // Set default password in localStorage if not exists
-    if (!localStorage.getItem("ashnora_admin_password")) {
-      localStorage.setItem("ashnora_admin_password", "admin123");
-    }
-  }, []);
-
-  const handleChangePasswordSubmit = (e) => {
+  const handleChangePasswordSubmit = async (e) => {
     e.preventDefault();
     setMessage({ type: "", text: "" });
 
-    const storedPassword = localStorage.getItem("ashnora_admin_password") || "admin123";
-
     // Validations
-    if (currentPassword !== storedPassword) {
-      setMessage({
-        type: "error",
-        text: "The current password you entered is incorrect.",
-      });
-      return;
-    }
-
     if (newPassword.length < 4) {
       setMessage({
         type: "error",
@@ -46,18 +30,24 @@ const Setting = () => {
       return;
     }
 
-    // Save Password
-    localStorage.setItem("ashnora_admin_password", newPassword);
-    
-    // Reset inputs
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    try {
+      await api.updatePassword(newPassword);
+      
+      // Reset inputs
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
 
-    setMessage({
-      type: "success",
-      text: "Password updated successfully!",
-    });
+      setMessage({
+        type: "success",
+        text: "Password updated successfully!",
+      });
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: err.message || "Failed to update password.",
+      });
+    }
   };
 
   return (

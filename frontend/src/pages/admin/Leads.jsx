@@ -12,6 +12,7 @@ import {
   FaInfoCircle,
   FaFileInvoiceDollar 
 } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const Leads = () => {
   const [leads, setLeads] = useState([]);
@@ -30,9 +31,13 @@ const Leads = () => {
   const [newStatus, setNewStatus] = useState("New");
 
   // Load leads
-  const loadLeads = () => {
-    const storedQuotes = JSON.parse(localStorage.getItem("ashnora_quotations") || "[]");
-    setLeads(storedQuotes);
+  const loadLeads = async () => {
+    try {
+      const data = await api.getQuotations();
+      setLeads(data);
+    } catch (err) {
+      console.error("Failed to load quotations: " + err.message);
+    }
   };
 
   useEffect(() => {
@@ -40,36 +45,44 @@ const Leads = () => {
   }, []);
 
   // Update Status
-  const handleStatusChange = (id, newStatusVal) => {
-    const updated = leads.map((item) => {
-      if (item.id === id) {
-        return { ...item, status: newStatusVal };
+  const handleStatusChange = async (id, newStatusVal) => {
+    try {
+      await api.updateQuotation(id, newStatusVal);
+      const updated = leads.map((item) => {
+        if (item._id === id) {
+          return { ...item, status: newStatusVal };
+        }
+        return item;
+      });
+      setLeads(updated);
+      
+      // Update active modal details if open
+      if (selectedLead && selectedLead._id === id) {
+        setSelectedLead({ ...selectedLead, status: newStatusVal });
       }
-      return item;
-    });
-    localStorage.setItem("ashnora_quotations", JSON.stringify(updated));
-    setLeads(updated);
-    
-    // Update active modal details if open
-    if (selectedLead && selectedLead.id === id) {
-      setSelectedLead({ ...selectedLead, status: newStatusVal });
+    } catch (err) {
+      alert("Failed to update status: " + err.message);
     }
   };
 
   // Delete Lead
-  const handleDeleteLead = (id) => {
+  const handleDeleteLead = async (id) => {
     if (window.confirm("Are you sure you want to delete this quotation request?")) {
-      const filtered = leads.filter((item) => item.id !== id);
-      localStorage.setItem("ashnora_quotations", JSON.stringify(filtered));
-      setLeads(filtered);
-      if (selectedLead && selectedLead.id === id) {
-        setSelectedLead(null);
+      try {
+        await api.deleteQuotation(id);
+        const filtered = leads.filter((item) => item._id !== id);
+        setLeads(filtered);
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(null);
+        }
+      } catch (err) {
+        alert("Failed to delete quotation: " + err.message);
       }
     }
   };
 
   // Add Manual Lead
-  const handleAddLeadSubmit = (e) => {
+  const handleAddLeadSubmit = async (e) => {
     e.preventDefault();
     if (!newName || !newMobile) {
       alert("Name and Mobile Number are required!");
@@ -77,33 +90,27 @@ const Leads = () => {
     }
 
     const newQuote = {
-      id: "quote_" + Date.now(),
       name: newName,
       mobile: newMobile,
       email: newEmail || "N/A",
       address: newAddress || "N/A",
       status: newStatus,
-      date: new Date().toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }) + ", " + new Date().toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
     };
 
-    const updated = [newQuote, ...leads];
-    localStorage.setItem("ashnora_quotations", JSON.stringify(updated));
-    setLeads(updated);
+    try {
+      const created = await api.createQuotation(newQuote);
+      setLeads([created, ...leads]);
 
-    // Reset Form & Close Modal
-    setNewName("");
-    setNewMobile("");
-    setNewEmail("");
-    setNewAddress("");
-    setNewStatus("New");
-    setShowAddModal(false);
+      // Reset Form & Close Modal
+      setNewName("");
+      setNewMobile("");
+      setNewEmail("");
+      setNewAddress("");
+      setNewStatus("New");
+      setShowAddModal(false);
+    } catch (err) {
+      alert("Failed to save lead: " + err.message);
+    }
   };
 
   // Filter Logic
@@ -197,7 +204,7 @@ const Leads = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredLeads.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/40 transition">
+                  <tr key={item._id} className="hover:bg-gray-50/40 transition">
                     {/* Customer */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -223,7 +230,7 @@ const Leads = () => {
                     <td className="px-6 py-4">
                       <select
                         value={item.status}
-                        onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                        onChange={(e) => handleStatusChange(item._id, e.target.value)}
                         className={`text-xs font-bold border rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer ${getStatusClasses(item.status)}`}
                       >
                         <option value="New">New</option>
@@ -248,7 +255,7 @@ const Leads = () => {
                         
                         {/* Delete Button */}
                         <button
-                          onClick={() => handleDeleteLead(item.id)}
+                          onClick={() => handleDeleteLead(item._id)}
                           title="Delete Lead"
                           className="p-2 bg-gray-50 hover:bg-red-500 text-gray-500 hover:text-white rounded-lg border border-gray-200 hover:border-red-500 transition duration-300 cursor-pointer"
                         >
@@ -288,7 +295,7 @@ const Leads = () => {
             {/* Modal Header */}
             <div className="bg-[#00539B] text-white p-6">
               <h3 className="text-xl font-bold">Quotation Lead Info</h3>
-              <p className="text-xs text-blue-200 mt-1">ID: {selectedLead.id}</p>
+              <p className="text-xs text-blue-200 mt-1">ID: {selectedLead._id}</p>
             </div>
 
             {/* Modal Body */}
@@ -342,7 +349,7 @@ const Leads = () => {
                     <span className="font-semibold text-gray-500 text-xs uppercase tracking-wider">Lead Status</span>
                     <select
                       value={selectedLead.status}
-                      onChange={(e) => handleStatusChange(selectedLead.id, e.target.value)}
+                      onChange={(e) => handleStatusChange(selectedLead._id, e.target.value)}
                       className={`text-xs font-bold border rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer ${getStatusClasses(selectedLead.status)}`}
                     >
                       <option value="New">New</option>

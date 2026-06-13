@@ -13,6 +13,7 @@ import {
   FaCalendarCheck,
   FaInfoCircle
 } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const Inquary = () => {
   const [surveys, setSurveys] = useState([]);
@@ -35,9 +36,13 @@ const Inquary = () => {
   const [newStatus, setNewStatus] = useState("Scheduled");
 
   // Load surveys
-  const loadSurveys = () => {
-    const storedSurveys = JSON.parse(localStorage.getItem("ashnora_surveys") || "[]");
-    setSurveys(storedSurveys);
+  const loadSurveys = async () => {
+    try {
+      const data = await api.getInquiries();
+      setSurveys(data);
+    } catch (err) {
+      console.error("Failed to load inquiries: " + err.message);
+    }
   };
 
   useEffect(() => {
@@ -45,24 +50,28 @@ const Inquary = () => {
   }, []);
 
   // Update Status
-  const handleStatusChange = (id, newStatusVal) => {
-    const updated = surveys.map((item) => {
-      if (item.id === id) {
-        return { ...item, status: newStatusVal };
+  const handleStatusChange = async (id, newStatusVal) => {
+    try {
+      await api.updateInquiry(id, newStatusVal, undefined);
+      const updated = surveys.map((item) => {
+        if (item._id === id) {
+          return { ...item, status: newStatusVal };
+        }
+        return item;
+      });
+      setSurveys(updated);
+      
+      // Update active modal details if open
+      if (selectedSurvey && selectedSurvey._id === id) {
+        setSelectedSurvey({ ...selectedSurvey, status: newStatusVal });
       }
-      return item;
-    });
-    localStorage.setItem("ashnora_surveys", JSON.stringify(updated));
-    setSurveys(updated);
-    
-    // Update active modal details if open
-    if (selectedSurvey && selectedSurvey.id === id) {
-      setSelectedSurvey({ ...selectedSurvey, status: newStatusVal });
+    } catch (err) {
+      alert("Failed to update inquiry status: " + err.message);
     }
   };
 
   // Schedule Survey Appointment Date
-  const handleScheduleSubmit = (e) => {
+  const handleScheduleSubmit = async (e) => {
     e.preventDefault();
     if (!appointmentDateTime) {
       alert("Please select a date and time!");
@@ -78,38 +87,46 @@ const Inquary = () => {
       minute: "2-digit",
     });
 
-    const updated = surveys.map((item) => {
-      if (item.id === showScheduleModal) {
-        return { ...item, date: formattedDate, status: "Scheduled" };
+    try {
+      await api.updateInquiry(showScheduleModal, undefined, formattedDate);
+      const updated = surveys.map((item) => {
+        if (item._id === showScheduleModal) {
+          return { ...item, date: formattedDate, status: "Scheduled" };
+        }
+        return item;
+      });
+      setSurveys(updated);
+      
+      // Update active details modal if open
+      if (selectedSurvey && selectedSurvey._id === showScheduleModal) {
+        setSelectedSurvey({ ...selectedSurvey, date: formattedDate, status: "Scheduled" });
       }
-      return item;
-    });
-    localStorage.setItem("ashnora_surveys", JSON.stringify(updated));
-    setSurveys(updated);
-    
-    // Update active details modal if open
-    if (selectedSurvey && selectedSurvey.id === showScheduleModal) {
-      setSelectedSurvey({ ...selectedSurvey, date: formattedDate, status: "Scheduled" });
-    }
 
-    setAppointmentDateTime("");
-    setShowScheduleModal(null);
+      setAppointmentDateTime("");
+      setShowScheduleModal(null);
+    } catch (err) {
+      alert("Failed to reschedule: " + err.message);
+    }
   };
 
   // Delete Survey Inquiry
-  const handleDeleteSurvey = (id) => {
+  const handleDeleteSurvey = async (id) => {
     if (window.confirm("Are you sure you want to delete this site survey request?")) {
-      const filtered = surveys.filter((item) => item.id !== id);
-      localStorage.setItem("ashnora_surveys", JSON.stringify(filtered));
-      setSurveys(filtered);
-      if (selectedSurvey && selectedSurvey.id === id) {
-        setSelectedSurvey(null);
+      try {
+        await api.deleteInquiry(id);
+        const filtered = surveys.filter((item) => item._id !== id);
+        setSurveys(filtered);
+        if (selectedSurvey && selectedSurvey._id === id) {
+          setSelectedSurvey(null);
+        }
+      } catch (err) {
+        alert("Failed to delete inquiry: " + err.message);
       }
     }
   };
 
   // Add Manual Survey
-  const handleAddSurveySubmit = (e) => {
+  const handleAddSurveySubmit = async (e) => {
     e.preventDefault();
     if (!newName || !newMobile) {
       alert("Name and Mobile Number are required!");
@@ -117,33 +134,27 @@ const Inquary = () => {
     }
 
     const newSurvey = {
-      id: "survey_" + Date.now(),
       name: newName,
       mobile: newMobile,
       email: newEmail || "N/A",
       address: newAddress || "N/A",
       status: newStatus,
-      date: new Date().toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }) + ", " + new Date().toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
     };
 
-    const updated = [newSurvey, ...surveys];
-    localStorage.setItem("ashnora_surveys", JSON.stringify(updated));
-    setSurveys(updated);
+    try {
+      const created = await api.createInquiry(newSurvey);
+      setSurveys([created, ...surveys]);
 
-    // Reset Form & Close Modal
-    setNewName("");
-    setNewMobile("");
-    setNewEmail("");
-    setNewAddress("");
-    setNewStatus("Scheduled");
-    setShowAddModal(false);
+      // Reset Form & Close Modal
+      setNewName("");
+      setNewMobile("");
+      setNewEmail("");
+      setNewAddress("");
+      setNewStatus("Scheduled");
+      setShowAddModal(false);
+    } catch (err) {
+      alert("Failed to book survey: " + err.message);
+    }
   };
 
   // Filter Logic
@@ -231,7 +242,7 @@ const Inquary = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredSurveys.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/40 transition">
+                  <tr key={item._id} className="hover:bg-gray-50/40 transition">
                     {/* Customer */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -253,19 +264,19 @@ const Inquary = () => {
                       <div className="flex items-center gap-2">
                         <span>{item.date}</span>
                         <button
-                          onClick={() => setShowScheduleModal(item.id)}
+                          onClick={() => setShowScheduleModal(item._id)}
                           className="text-xs text-[#00539B] hover:text-orange-500 underline font-bold cursor-pointer"
                         >
                           Reschedule
                         </button>
                       </div>
                     </td>
-
+ 
                     {/* Status Dropdown */}
                     <td className="px-6 py-4">
                       <select
                         value={item.status}
-                        onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                        onChange={(e) => handleStatusChange(item._id, e.target.value)}
                         className={`text-xs font-bold border rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer ${getStatusClasses(item.status)}`}
                       >
                         <option value="Scheduled">Scheduled</option>
@@ -273,7 +284,7 @@ const Inquary = () => {
                         <option value="Cancelled">Cancelled</option>
                       </select>
                     </td>
-
+ 
                     {/* Actions */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -288,7 +299,7 @@ const Inquary = () => {
                         
                         {/* Delete Button */}
                         <button
-                          onClick={() => handleDeleteSurvey(item.id)}
+                          onClick={() => handleDeleteSurvey(item._id)}
                           title="Delete Survey"
                           className="p-2 bg-gray-50 hover:bg-red-500 text-gray-500 hover:text-white rounded-lg border border-gray-200 hover:border-red-500 transition duration-300 cursor-pointer"
                         >
@@ -311,7 +322,7 @@ const Inquary = () => {
           )}
         </div>
       </div>
-
+ 
       {/* SURVEY DETAILS MODAL */}
       {selectedSurvey && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -324,13 +335,13 @@ const Inquary = () => {
             >
               <FaTimes size={16} />
             </button>
-
+ 
             {/* Modal Header */}
             <div className="bg-[#00539B] text-white p-6">
               <h3 className="text-xl font-bold">Site Survey Details</h3>
-              <p className="text-xs text-blue-200 mt-1">ID: {selectedSurvey.id}</p>
+              <p className="text-xs text-blue-200 mt-1">ID: {selectedSurvey._id}</p>
             </div>
-
+ 
             {/* Modal Body */}
             <div className="p-6 space-y-5">
               
@@ -344,7 +355,7 @@ const Inquary = () => {
                   <p className="text-xs text-gray-400">Created: {selectedSurvey.date}</p>
                 </div>
               </div>
-
+ 
               {/* Information Rows */}
               <div className="space-y-4">
                 
@@ -356,7 +367,7 @@ const Inquary = () => {
                     <span className="text-gray-800 font-medium">{selectedSurvey.mobile}</span>
                   </div>
                 </div>
-
+ 
                 {/* Email */}
                 <div className="flex gap-3 text-sm">
                   <FaEnvelope className="text-gray-400 mt-1 shrink-0" />
@@ -365,7 +376,7 @@ const Inquary = () => {
                     <span className="text-gray-800 font-medium">{selectedSurvey.email}</span>
                   </div>
                 </div>
-
+ 
                 {/* Address */}
                 <div className="flex gap-3 text-sm">
                   <FaMapMarkerAlt className="text-gray-400 mt-1 shrink-0" />
@@ -374,7 +385,7 @@ const Inquary = () => {
                     <p className="text-gray-800 font-medium leading-relaxed whitespace-pre-line">{selectedSurvey.address}</p>
                   </div>
                 </div>
-
+ 
                 {/* Appointment Schedule */}
                 <div className="flex gap-3 text-sm items-center">
                   <FaCalendarAlt className="text-gray-400 shrink-0" />
@@ -384,14 +395,14 @@ const Inquary = () => {
                       <span className="text-gray-800 font-medium">{selectedSurvey.date}</span>
                     </div>
                     <button
-                      onClick={() => setShowScheduleModal(selectedSurvey.id)}
+                      onClick={() => setShowScheduleModal(selectedSurvey._id)}
                       className="text-xs text-[#00539B] hover:text-orange-500 underline font-bold cursor-pointer"
                     >
                       Reschedule
                     </button>
                   </div>
                 </div>
-
+ 
                 {/* Status Update */}
                 <div className="flex gap-3 text-sm border-t border-gray-100 pt-4 items-center">
                   <FaInfoCircle className="text-gray-400 shrink-0" />
@@ -399,7 +410,7 @@ const Inquary = () => {
                     <span className="font-semibold text-gray-500 text-xs uppercase tracking-wider">Survey Status</span>
                     <select
                       value={selectedSurvey.status}
-                      onChange={(e) => handleStatusChange(selectedSurvey.id, e.target.value)}
+                      onChange={(e) => handleStatusChange(selectedSurvey._id, e.target.value)}
                       className={`text-xs font-bold border rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer ${getStatusClasses(selectedSurvey.status)}`}
                     >
                       <option value="Scheduled">Scheduled</option>
@@ -408,11 +419,11 @@ const Inquary = () => {
                     </select>
                   </div>
                 </div>
-
+ 
               </div>
-
+ 
             </div>
-
+ 
           </div>
         </div>
       )}

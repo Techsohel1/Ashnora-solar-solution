@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Phone, Mail } from "lucide-react";
 import { FaCheckCircle } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const FreeSolarQuotation = () => {
   const [name, setName] = useState("");
@@ -9,7 +10,7 @@ const FreeSolarQuotation = () => {
   const [address, setAddress] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleQuotationSubmit = (e) => {
+  const handleQuotationSubmit = async (e) => {
     e.preventDefault();
     if (!name || !mobile) {
       alert("Name and Mobile Number are required!");
@@ -17,37 +18,30 @@ const FreeSolarQuotation = () => {
     }
 
     const newQuote = {
-      id: 'quote_' + Date.now(),
       name,
       mobile,
       email: email || "N/A",
       address: address || "N/A",
       status: 'New',
-      date: new Date().toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      }) + ', ' + new Date().toLocaleTimeString('en-IN', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
     };
 
-    const existingQuotes = JSON.parse(localStorage.getItem('ashnora_quotations') || '[]');
-    existingQuotes.unshift(newQuote);
-    localStorage.setItem('ashnora_quotations', JSON.stringify(existingQuotes));
+    try {
+      await api.createQuotation(newQuote);
 
-    // Reset fields
-    setName("");
-    setMobile("");
-    setEmail("");
-    setAddress("");
-    
-    // Show success message
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 4500);
+      // Reset fields
+      setName("");
+      setMobile("");
+      setEmail("");
+      setAddress("");
+      
+      // Show success message
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 4500);
+    } catch (error) {
+      alert("Failed to submit quotation request: " + error.message);
+    }
   };
 
   return (
