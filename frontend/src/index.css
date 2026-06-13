@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+.testimonial-slider {
+  padding-bottom: 60px;
+}
+
+.testimonial-slider .swiper-pagination {
+  bottom: 0 !important;
+}
+
+.testimonial-slider .swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: #cbd5e1;
+  opacity: 1;
+}
+
+.testimonial-slider .swiper-pagination-bullet-active {
+  width: 28px;
+  border-radius: 999px;
+  background: #ff7300 !important;
+}
+
+:root {
+  --primary-color: #00539B;
+  --accent-color: #ff7300;
+  --background-color: #f5f7fa;
+  --dark-text: #1f2937;
+}
