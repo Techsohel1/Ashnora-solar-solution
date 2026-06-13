@@ -154,7 +154,7 @@ const ContactFormBusiness = () => {
 
               <button
                 type="submit"
-                className="w-full bg-[#ff7300] hover:bg-orange-600 text-white font-semibold text-2xl py-4 rounded-md transition-all duration-300 cursor-pointer"
+                className="w-full bg-[#ff7300] hover:bg-orange-600 text-white font-semibold text-xl md:text-2xl py-4 rounded-md transition-all duration-300 cursor-pointer"
               >
                 Submit
               </button>

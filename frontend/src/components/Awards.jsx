@@ -15,7 +15,7 @@ const Awards = () => {
 
     
       <div className="absolute top-0 left-0 w-full h-full">
-        <div className="w-[140%] h-125 bg-white/40 rounded-[50%] absolute -top-64 left-1/2 -translate-x-1/2"></div>
+        <div className="w-[140%] h-[500px] bg-white/40 rounded-[50%] absolute -top-64 left-1/2 -translate-x-1/2"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">

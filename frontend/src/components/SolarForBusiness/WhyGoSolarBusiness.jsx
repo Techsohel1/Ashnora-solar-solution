@@ -50,7 +50,7 @@ const WhyGoSolarBusiness = () => {
           {strengths.map((item, index) => (
             <div
               key={index}
-              className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition duration-300 flex items-start gap-5"
+              className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition duration-300 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5"
             >
             
               <img

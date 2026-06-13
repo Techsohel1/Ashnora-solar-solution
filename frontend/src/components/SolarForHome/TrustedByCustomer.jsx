@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 const TrustedByCustomers = () => {
   return (
     <section className="bg-[#f2f2f2] py-12 lg:py-0 overflow-hidden">
-      <div className="max-w-350 mx-auto">
-        <div className="grid lg:grid-cols-[55%_45%] items-center min-h-155">
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="grid lg:grid-cols-[55%_45%] items-center lg:min-h-[500px]">
           
           {/* Left Content */}
           <div className="px-6 lg:px-10 py-10">
@@ -51,11 +51,11 @@ const TrustedByCustomers = () => {
           </div>
 
           {/* Right Image */}
-          <div className="flex items-center h-full -ml-8">
+          <div className="flex items-center h-full lg:-ml-8 mt-8 lg:mt-0">
             <img
               src="/images/solar-for-home.png"
               alt="Solar Home"
-              className="w-full max-w-150 h-auto object-contain"
+              className="w-full max-w-md mx-auto h-auto object-contain"
             />
           </div>
 

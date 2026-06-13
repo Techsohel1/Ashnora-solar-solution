@@ -3,7 +3,7 @@
 const VisitUs = () => {
   return (
     <section className="bg-[#f3f3f3] py-16 lg:py-20">
-      <div className="max-w-350 mx-auto px-6">
+      <div className="max-w-[1400px] mx-auto px-6">
 
         {/* Heading */}
         <div className="text-center mb-12">

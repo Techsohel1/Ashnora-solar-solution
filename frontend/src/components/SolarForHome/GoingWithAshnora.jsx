@@ -22,11 +22,11 @@ const GoingWithAshnora = () => {
       <div className="max-w-[1400px] mx-auto">
         <div className="grid lg:grid-cols-[48%_52%] items-center">
           
-          <div>
+          <div className="flex justify-center mb-8 lg:mb-0">
             <img
               src="/images/drivemass.png"
               alt="Ashnora Solar Solution"
-              className="w-20rem h-20rem object-cover"
+              className="w-full max-w-[320px] h-[320px] object-cover rounded-3xl"
             />
           </div>
 

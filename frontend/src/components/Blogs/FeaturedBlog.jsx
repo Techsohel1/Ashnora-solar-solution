@@ -26,7 +26,7 @@ Choosing a partner who prioritizes service is the smartest investment you can ma
     <section className="bg-[#f5f7fa] py-20">
       <div className="max-w-[1400px] mx-auto px-6">
 
-        <div className="bg-white rounded-[40px] shadow-lg p-8 lg:p-12">
+        <div className="bg-white rounded-3xl shadow-lg p-5 sm:p-8 lg:p-12">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
 
             {/* Image */}
@@ -38,7 +38,7 @@ Choosing a partner who prioritizes service is the smartest investment you can ma
               <img
                 src={featuredPost.image}
                 alt="Solar Blog"
-                className="w-full h-[450px] object-cover rounded-3xl"
+                className="w-full h-64 sm:h-[450px] object-cover rounded-3xl"
               />
             </div>
 

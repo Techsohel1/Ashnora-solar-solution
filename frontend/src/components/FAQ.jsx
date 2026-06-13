@@ -85,7 +85,7 @@ const FAQ = () => {
               <div
                 className={`transition-all duration-300 overflow-hidden ${
                   openIndex === index
-                    ? "max-h-40 opacity-100"
+                    ? "max-h-96 opacity-100"
                     : "max-h-0 opacity-0"
                 }`}
               >

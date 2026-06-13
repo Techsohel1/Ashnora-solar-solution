@@ -38,7 +38,7 @@ const TransformingPotential = () => {
             </p>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-8 mt-14">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-14">
               <div className="text-center">
                 <h3 className="text-5xl lg:text-6xl font-bold text-[#00539B]">
                   30MW+
