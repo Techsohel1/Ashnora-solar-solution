@@ -9,18 +9,30 @@ import {
   FaHourglassHalf,
   FaCheckCircle,
 } from "react-icons/fa";
+import { api } from "../../utils/api";
 
 const Dashboard = () => {
   const [surveys, setSurveys] = useState([]);
   const [quotations, setQuotations] = useState([]);
 
-  useEffect(() => {
-    // Read data from localStorage
-    const storedSurveys = JSON.parse(localStorage.getItem("ashnora_surveys") || "[]");
-    const storedQuotes = JSON.parse(localStorage.getItem("ashnora_quotations") || "[]");
-    setSurveys(storedSurveys);
-    setQuotations(storedQuotes);
-  }, []);
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const inquiries = await api.getInquiries();
+      console.log("Inquiries:", inquiries);
+
+      const quotations = await api.getQuotations();
+      console.log("Quotations:", quotations);
+
+      setSurveys(inquiries);
+      setQuotations(quotations);
+    } catch (err) {
+      console.error("API Error:", err);
+    }
+  };
+
+  fetchData();
+}, []);
 
   // Compute Metrics
   const totalLeads = quotations.length;
