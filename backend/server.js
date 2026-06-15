@@ -11,7 +11,6 @@ import Admin from "./models/Admin.js";
 // Load env variables
 dotenv.config();
 
-// Connect to Database
 connectDB();
 
 const app = express();
@@ -27,7 +26,20 @@ if (process.env.FRONTEND_URL) {
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Allow any Vercel deployment preview url matching the project prefix
+      if (/^https:\/\/ashnora-solar-solution-[a-z0-9-]+\.vercel\.app$/.test(origin)) {
+        return callback(null, true);
+      }
+      
+      return callback(new Error("Not allowed by CORS"), false);
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })

@@ -13,6 +13,7 @@ export const adminLogin = async (req, res) => {
         const { username, password } = req.body;
         const admin = await Admin.findOne({ username });
 
+
         if (admin && (await admin.matchPassword(password))) {
             res.json({
                 _id: admin._id,
