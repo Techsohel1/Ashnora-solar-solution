@@ -30,17 +30,15 @@ const Leads = () => {
   const [newAddress, setNewAddress] = useState("");
   const [newStatus, setNewStatus] = useState("New");
 
-  // Load leads
-  const loadLeads = async () => {
-    try {
-      const data = await api.getQuotations();
-      setLeads(data);
-    } catch (err) {
-      console.error("Failed to load quotations: " + err.message);
-    }
-  };
-
   useEffect(() => {
+    const loadLeads = async () => {
+      try {
+        const data = await api.getQuotations();
+        setLeads(data);
+      } catch (err) {
+        console.error("Failed to load quotations: " + err.message);
+      }
+    };
     loadLeads();
   }, []);
 

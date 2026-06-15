@@ -27,13 +27,13 @@ function App() {
   return (
     <BrowserRouter>
 
-      <ScrollToTop/>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
 
         <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/theAshnoraAdvantage" element={<TheAshnoraAdvantage/>}/>
-        
+        <Route path="/theAshnoraAdvantage" element={<TheAshnoraAdvantage />} />
+
 
         <Route
           path="/solar-for-home"
@@ -44,8 +44,8 @@ function App() {
           path="/solar-for-business"
           element={<SolarForBusiness />}
         />
-        <Route path="/blogs" element={<Blogs/>}/>
-        <Route path="/contact-us" element={<ContactUs />}/>
+        <Route path="/blogs" element={<Blogs />} />
+        <Route path="/contact-us" element={<ContactUs />} />
 
         {/* Public Login Route */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -60,7 +60,7 @@ function App() {
             <Route path="setting" element={<Setting />} />
           </Route>
         </Route>
-        
+
       </Routes>
 
     </BrowserRouter>

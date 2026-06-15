@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://ashnora-solar-solution-17ph.vercel.app";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://ashnora-solar-solution-17ph.vercel.app/api";
 
 console.log("Resolved API_BASE_URL:", API_BASE_URL);
 
@@ -21,12 +21,12 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    
+
     if (!response.ok) {
       const err = await response.json();
       throw new Error(err.message || "Login failed");
     }
-    
+
     const data = await response.json();
     localStorage.setItem("ashnora_token", data.token);
     sessionStorage.setItem("ashnora_admin_logged_in", "true");

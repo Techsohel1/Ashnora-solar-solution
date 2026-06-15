@@ -25,17 +25,15 @@ const Blogs = () => {
   const [description, setDescription] = useState("");
   const [blogDate, setBlogDate] = useState("");
 
-  // Load blogs
-  const loadBlogs = async () => {
-    try {
-      const data = await api.getBlogs();
-      setBlogs(data);
-    } catch (err) {
-      console.error("Failed to load blogs: " + err.message);
-    }
-  };
-
   useEffect(() => {
+    const loadBlogs = async () => {
+      try {
+        const data = await api.getBlogs();
+        setBlogs(data);
+      } catch (err) {
+        console.error("Failed to load blogs: " + err.message);
+      }
+    };
     loadBlogs();
   }, []);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaLock, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { FaUser, FaLock, FaExclamationCircle } from "react-icons/fa";
 import { api } from "../../utils/api";
 
 const Login = () => {

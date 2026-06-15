@@ -3,10 +3,8 @@ import { Link } from "react-router-dom";
 import {
   FaCalendarCheck,
   FaFileInvoiceDollar,
-  FaUsers,
   FaAward,
   FaArrowRight,
-  FaHourglassHalf,
   FaCheckCircle,
 } from "react-icons/fa";
 import { api } from "../../utils/api";

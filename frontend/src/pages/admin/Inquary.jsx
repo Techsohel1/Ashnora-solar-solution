@@ -35,17 +35,15 @@ const Inquary = () => {
   const [newAddress, setNewAddress] = useState("");
   const [newStatus, setNewStatus] = useState("Scheduled");
 
-  // Load surveys
-  const loadSurveys = async () => {
-    try {
-      const data = await api.getInquiries();
-      setSurveys(data);
-    } catch (err) {
-      console.error("Failed to load inquiries: " + err.message);
-    }
-  };
-
   useEffect(() => {
+    const loadSurveys = async () => {
+      try {
+        const data = await api.getInquiries();
+        setSurveys(data);
+      } catch (err) {
+        console.error("Failed to load inquiries: " + err.message);
+      }
+    };
     loadSurveys();
   }, []);
 

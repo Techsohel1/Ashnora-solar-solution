@@ -29,16 +29,21 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-      
+
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      
+
+      // Allow any localhost origin (e.g. http://localhost:5174, etc.)
+      if (/^http:\/\/localhost:\d+$/.test(origin)) {
+        return callback(null, true);
+      }
+
       // Allow any Vercel deployment preview url matching the project prefix
       if (/^https:\/\/ashnora-solar-solution-[a-z0-9-]+\.vercel\.app$/.test(origin)) {
         return callback(null, true);
       }
-      
+
       return callback(new Error("Not allowed by CORS"), false);
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -81,5 +86,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
- 
+
 });
