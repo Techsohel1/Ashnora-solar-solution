@@ -17,7 +17,8 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://ashnora-solar-solution.vercel.app"
+  "https://ashnora-solar-solution.vercel.app",
+  "https://ashnora-solar-solution-17ph.vercel.app"
 ];
 
 if (process.env.FRONTEND_URL) {
