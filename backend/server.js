@@ -16,13 +16,18 @@ connectDB();
 
 const app = express();
 
-// Middleware
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ashnora-solar-solution.vercel.app"
+];
+
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(
   cors({
-    origin: [
-      "https://ashnora-solar-solution.vercel.app",
-      "http://localhost:5173",
-    ],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
