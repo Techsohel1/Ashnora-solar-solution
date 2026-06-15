@@ -3,6 +3,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
     ? "http://localhost:5000/api"
     : "https://ashnora-backend.onrender.com/api");
 
+console.log("Resolved API_BASE_URL:", API_BASE_URL);
+
 // Helper to get auth header
 const getAuthHeaders = () => {
   const token = localStorage.getItem("ashnora_token");
@@ -15,7 +17,9 @@ const getAuthHeaders = () => {
 export const api = {
   // Auth APIs
   login: async (username, password) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const targetUrl = `${API_BASE_URL}/auth/login`;
+    console.log("Sending login request to:", targetUrl);
+    const response = await fetch(targetUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
